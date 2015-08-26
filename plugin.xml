@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+    xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="cordova-launch-review"
+    version="1.0.0">
+
+    <name>LaunchReview</name>
+    <description></description>
+    <author></author>
+
+    <engines>
+        <engine name="cordova" version=">=3.0.0" />
+    </engines>
+
+    <js-module src="www/launchreview.js" name="LaunchReview">
+        <clobbers target="LaunchReview" />
+    </js-module>
+
+    <!-- ios -->
+        <platform name="ios">
+            <config-file target="config.xml" parent="/*">
+                <feature name="LaunchReview">
+                    <param name="ios-package" value="LaunchReview"/>
+                </feature>
+            </config-file>
+
+            <header-file src="src/ios/LaunchReview.h" />
+            <source-file src="src/ios/LaunchReview.m" />
+    </platform>
+
+    <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="LaunchReview">
+                <param name="android-package" value="uk.co.workingedge.phonegap.plugin.LaunchReview"/>
+            </feature>
+        </config-file>
+
+        <source-file src="src/android/LaunchReview.java" target-dir="src/uk/co/workingedge/phonegap/plugin" />
+    </platform>
+
+</plugin>
