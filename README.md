@@ -4,9 +4,6 @@ Cordova Launch Review plugin
 * [Overview](#overview)
 * [Installation](#installation)
 * [Usage](#usage)
-    * [Android and iOS](#android-and-ios)
-    * [Android only](#android-only)
-    * [iOS only](#ios-only)
 * [Example project](#example-project)
 * [Credits](#credits)
 
