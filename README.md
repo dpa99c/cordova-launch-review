@@ -14,11 +14,11 @@ Cordova Launch Review plugin
 
 This Cordova/Phonegap plugin for iOS and Android launches the native store app in order for the user to leave a review.
 
-On Android, the plugin opens the Play Store app on the app's storepage where the user can leave a rating/review.
+On Android, the plugin opens the the app's storepage in the Play Store where the user can leave a review by pressing the stars to give a rating.
 
-On iOS - TODO
+On iOS, the plugin opens the app's storepage in the App Store and focuses the Review tab, where the user can leave a review by pressing "Write a review".
 
-The plugin is registered on [npm](https://www.npmjs.com/package/cordova-launch-review) (Cordova CLI 5+) as `cordova-launch-review`
+The plugin is registered on [npm](https://www.npmjs.com/package/cordova-launch-review) (requires Cordova CLI 5.0.0+) as `cordova-launch-review`
 
 # Installation
 
