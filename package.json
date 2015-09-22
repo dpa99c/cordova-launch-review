@@ -1,5 +1,5 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "cordova-launch-review",
   "cordova_name": "Launch Review",
   "description": "Cordova/Phonegap plugin to launch the native store app on Android (Google Play) and iOS (App Store) on the review page for a given app.",
@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dpa99c/phonegap-launch-review.git"
+    "url": "https://github.com/dpa99c/cordova-launch-review.git"
   },
   "cordova": {
     "id": "cordova-launch-review",
@@ -16,7 +16,7 @@
       "ios"
     ]
   },
-  "issue": "https://github.com/dpa99c/phonegap-launch-review/issues",
+  "issue": "https://github.com/dpa99c/cordova-launch-review/issues",
   "keywords": [
     "ecosystem:cordova",
     "cordova",
