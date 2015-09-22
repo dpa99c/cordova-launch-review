@@ -48,7 +48,7 @@ The plugin is exposed via the `LaunchReview` object and provides a single functi
 - {string} appID - the platform-specific app ID to use to open the page in the store app
     - On Android this is the full package name of the app. For example, for Google Maps: `com.google.android.apps.maps`
     - On iOS this is the Apple ID of the app. For example, for Google Maps: `585027354`
-- {function} successCallback - The callback which will be called when diagnostic of location is successful. This callback function have a boolean param with the diagnostic result.
+- {function} successCallback - Callback which is executed on successfully launching store app.
 
 
 ## Example usage
