@@ -36,5 +36,6 @@
 @interface LaunchReview :CDVPlugin {
 }
 - (void) launch:(CDVInvokedUrlCommand*)command;
+- (void) rating:(CDVInvokedUrlCommand*)command;
 
 @end

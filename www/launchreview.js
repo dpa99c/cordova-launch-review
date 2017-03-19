@@ -1,5 +1,4 @@
-/*
- * Copyright (c) 2015 Dave Alden  (http://github.com/dpa99c)
+/* Copyright (c) 2015 Dave Alden  (http://github.com/dpa99c)
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -23,14 +22,41 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-var LaunchReview = function() {};
+var LaunchReview = {};
 
 /**
  * Launches App Store on current platform in order to leave a review for given app
- * @param {string} ID of app to open in App Store
- * @param {function} successCallback function to be called when plugin call was successful
+ * @param {string} appId (required) - ID of app to open in App Store
+ * @param {function} success (optional) -  function to be called when plugin call was successful.
+ * @param {function} error (optional) - function to be called on error during plugin call.
+ * Will be passed a single argument which is the error message string.
  */
-LaunchReview.prototype.launch = function(appId, successCallback) {
-    cordova.exec(successCallback, null, 'LaunchReview', 'launch', [appId]);
+LaunchReview.launch = function(appId, success, error) {
+    cordova.exec(success, error, 'LaunchReview', 'launch', [appId]);
 };
-module.exports = new LaunchReview();
+
+/**
+ * Opens the in-app ratings dialogs introduced by iOS 10.3.
+ * iOS only. Calling this on any platform other than iOS 10.3 or above will result in the error function being called.
+ * @param {function} success (optional) -  function to be called when plugin call was successful.
+ * @param {function} error (optional) - function to be called on error during plugin call.
+ * Will be passed a single argument which is the error message string.
+ */
+LaunchReview.rating = function(success, error) {
+    if(LaunchReview.isRatingSupported()){
+        cordova.exec(success, error, 'LaunchReview', 'rating', []);
+    }else{
+        error("Rating dialog requires iOS 10.3+");
+    }
+};
+
+/**
+ * Indicates if the current platform supports in-app ratings dialog, i.e. calling LaunchReview.rating().
+ * Will return true if current platform is iOS 10.3 or above.
+ * @returns {boolean} true if the current platform supports in-app ratings dialog
+ */
+LaunchReview.isRatingSupported = function(){
+    return device.platform === "iOS" && parseFloat(device.version) >= 10.3;
+};
+
+module.exports = LaunchReview;

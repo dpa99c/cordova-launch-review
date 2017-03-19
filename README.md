@@ -1,11 +1,22 @@
 Cordova Launch Review plugin [![Latest Stable Version](https://img.shields.io/npm/v/cordova-launch-review.svg)](https://www.npmjs.com/package/cordova-launch-review) [![Total Downloads](https://img.shields.io/npm/dt/cordova-launch-review.svg)](https://npm-stat.com/charts.html?package=cordova-launch-review)
 ============================
 
-* [Overview](#overview)
-* [Installation](#installation)
-* [Usage](#usage)
-* [Example project](#example-project)
-* [Credits](#credits)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Overview](#overview)
+- [Installation](#installation)
+  - [Using the Cordova/Phonegap CLI](#using-the-cordovaphonegap-cli)
+  - [PhoneGap Build](#phonegap-build)
+- [Usage](#usage)
+  - [launch()](#launch)
+  - [rating()](#rating)
+  - [isRatingSupported()](#isratingsupported)
+- [Example project](#example-project)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 # Overview
 
@@ -13,7 +24,8 @@ This Cordova/Phonegap plugin for iOS and Android launches the native store app i
 
 On Android, the plugin opens the the app's storepage in the Play Store where the user can leave a review by pressing the stars to give a rating.
 
-On iOS, the plugin opens the app's storepage in the App Store and focuses the Review tab, where the user can leave a review by pressing "Write a review".
+On iOS, the plugin opens the app's storepage in the App Store, focuses the Review tab, and automatically opens the dialog for the user to leave a rating or review.
+On iOS 10.3 and above, there is also support for the in-app ratings dialog which allows a user to rate your app without needing to open the App Store.
 
 The plugin is registered on [npm](https://www.npmjs.com/package/cordova-launch-review) (requires Cordova CLI 5.0.0+) as `cordova-launch-review`
 
@@ -24,14 +36,6 @@ The plugin is registered on [npm](https://www.npmjs.com/package/cordova-launch-r
     $ cordova plugin add cordova-launch-review
     $ phonegap plugin add cordova-launch-review
 
-## Using [Cordova Plugman](https://github.com/apache/cordova-plugman)
-
-    $ plugman install --plugin=cordova-launch-review --platform=<platform> --project=<project_path> --plugins_dir=plugins
-
-For example, to install for the Android platform
-
-    $ plugman install --plugin=cordova-launch-review --platform=android --project=platforms/android --plugins_dir=plugins
-
 ## PhoneGap Build
 Add the following xml to your config.xml to use the latest version from [npm](https://www.npmjs.com/package/cordova-launch-review):
 
@@ -39,19 +43,25 @@ Add the following xml to your config.xml to use the latest version from [npm](ht
 
 # Usage
 
-The plugin is exposed via the `LaunchReview` object and provides a single function `launch()` which launches the store app using the given app ID:
+The plugin is exposed via the `LaunchReview` global namespace.
 
-    LaunchReview.launch(appId, successCallback);
+## launch()
 
-## Parameters
+Launches the store app using the given app ID.
+Supports both Android and iOS.
+
+    LaunchReview.launch(appId, success, error);
+
+### Parameters
 
 - {string} appID - the platform-specific app ID to use to open the page in the store app
     - On Android this is the full package name of the app. For example, for Google Maps: `com.google.android.apps.maps`
     - On iOS this is the Apple ID of the app. For example, for Google Maps: `585027354`
-- {function} successCallback - Callback which is executed on successfully launching store app.
+- {function} success - Function to execute on successfully launching store app.
+- {function} error - Function to execute on failure to launch store app. Will be passed a single argument which is the error message string.
 
 
-## Example usage
+### Example usage
 
     var appId, platform = device.platform.toLowerCase();
 
@@ -66,7 +76,45 @@ The plugin is exposed via the `LaunchReview` object and provides a single functi
 
     LaunchReview.launch(appId, function(){
         console.log("Successfully launched store app");
+    },function(err){
+        console.log("Error launching store app: " + err);
     });
+
+## rating()
+
+Opens the in-app ratings dialogs introduced by iOS 10.3.
+iOS only. Calling this on any platform other than iOS 10.3 or above will result in the error function being called.
+
+    LaunchReview.rating(success, error);
+
+### Parameters
+
+- {function} success - Function to execute on successfully launching rating dialog.
+- {function} error - Function to execute on failure to launch rating dialog. Will be passed a single argument which is the error message string.
+
+
+### Example usage
+
+    LaunchReview.rating(function(){
+        console.log("Successfully opened rating dialog");
+    },function(err){
+        console.log("Error opening rating dialog: " + err);
+    });
+
+## isRatingSupported()
+
+Indicates if the current platform supports in-app ratings dialog, i.e. calling `LaunchReview.rating()`.
+Will return true if current platform is iOS 10.3 or above.
+
+    LaunchReview.isRatingSupported();
+
+### Example usage
+
+    if(LaunchReview.isRatingSupported()){
+        LaunchReview.rating();
+    }else{
+        LaunchReview.launch(myAppId);
+    }
 
 # Example project
 

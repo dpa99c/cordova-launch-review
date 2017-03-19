@@ -24,21 +24,48 @@
  *
  */
 #import "LaunchReview.h"
+#import "Storekit/Storekit.h"
+
 
 @implementation LaunchReview
 - (void) launch:(CDVInvokedUrlCommand*)command;
 {
-    CDVPluginResult* pluginResult = nil;
-    
-    NSString *appId = [command.arguments objectAtIndex:0];
-    
-    NSString *iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@", appId];
-   
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:iTunesLink]];
-    
+    @try {
+        CDVPluginResult* pluginResult;
+        NSString* appId = [command.arguments objectAtIndex:0];
+        NSString* iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@&action=write-review", appId];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:iTunesLink]];
         
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
+    @catch (NSException *exception) {
+        [self handlePluginException:exception :command];
+    }
+}
+
+- (void) rating:(CDVInvokedUrlCommand*)command;
+{
+    @try {
+        CDVPluginResult* pluginResult;
+        
+#if defined(__IPHONE_10_3) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_3
+        [SKStoreReviewController requestReview];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+#else
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Rating dialog requires iOS 10.3+"];
+#endif
+        
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
+    @catch (NSException *exception) {
+        [self handlePluginException:exception :command];
+    }
+}
+
+- (void) handlePluginException: (NSException*) exception :(CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

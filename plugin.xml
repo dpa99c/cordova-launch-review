@@ -3,7 +3,7 @@
     xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-launch-review"
-    version="1.0.3">
+    version="2.0.0">
 
     <name>Launch Review</name>
     <description>This Cordova/Phonegap plugin for iOS and Android launches the native store app in order for the user to leave a review.</description>
@@ -23,6 +23,8 @@
     <js-module src="www/launchreview.js" name="LaunchReview">
         <clobbers target="LaunchReview" />
     </js-module>
+    
+    <dependency id="cordova-plugin-device" version="*" />
 
     <!-- ios -->
         <platform name="ios">
@@ -34,6 +36,8 @@
 
             <header-file src="src/ios/LaunchReview.h" />
             <source-file src="src/ios/LaunchReview.m" />
+            
+            <framework src="StoreKit.framework" />
     </platform>
 
     <!-- android -->

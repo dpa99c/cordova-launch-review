@@ -1,32 +1,31 @@
 {
-  "version": "1.0.3",
-  "name": "cordova-launch-review",
-  "cordova_name": "Launch Review",
-  "description": "Cordova/Phonegap plugin to launch the native store app on Android (Google Play) and iOS (App Store) on the review page for a given app.",
-  "author": "Dave Alden",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/dpa99c/cordova-launch-review.git"
-  },
-  "cordova": {
-    "id": "cordova-launch-review",
-    "platforms": [
-      "android",
-      "ios"
-    ]
-  },
-  "issue": "https://github.com/dpa99c/cordova-launch-review/issues",
-  "keywords": [
-    "ecosystem:cordova",
-    "cordova",
-    "phonegap",
-    "ios",
-    "android",
-    "review",
-    "app store"
-  ],
-  "dependencies": {
-    "tostr": "^0.1.0"
-   }
+    "version": "2.0.0",
+    "name": "cordova-launch-review",
+    "cordova_name": "Launch Review",
+    "description": "Cordova/Phonegap plugin to launch the native store app on Android (Google Play) and iOS (App Store) on the review page for a given app.",
+    "author": "Dave Alden",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dpa99c/cordova-launch-review.git"
+    },
+    "cordova": {
+        "id": "cordova-launch-review",
+        "platforms": [
+            "android",
+            "ios"
+        ]
+    },
+    "issue": "https://github.com/dpa99c/cordova-launch-review/issues",
+    "keywords": [
+        "ecosystem:cordova",
+        "cordova",
+        "phonegap",
+        "ios",
+        "android",
+        "review",
+        "rating",
+        "app store"
+    ],
+    "dependencies": {}
 }
