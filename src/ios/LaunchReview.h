@@ -25,9 +25,9 @@
  */
 
 #ifdef CORDOVA_FRAMEWORK
-#import <CORDOVA/CDVPlugin.h>
+#import <Cordova/CDVPlugin.h>
 #else
-#import "CORDOVA/CDVPlugin.h"
+#import "Cordova/CDVPlugin.h"
 #endif
 
 /**
