@@ -3,7 +3,7 @@
     xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-launch-review"
-    version="2.0.0">
+    version="2.0.1">
 
     <name>Launch Review</name>
     <description>This Cordova/Phonegap plugin for iOS and Android launches the native store app in order for the user to leave a review.</description>
