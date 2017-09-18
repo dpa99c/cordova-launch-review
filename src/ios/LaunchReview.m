@@ -24,7 +24,7 @@
  *
  */
 #import "LaunchReview.h"
-#import "Storekit/Storekit.h"
+#import "StoreKit/StoreKit.h"
 
 
 @implementation LaunchReview
