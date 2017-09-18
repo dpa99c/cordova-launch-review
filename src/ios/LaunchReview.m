@@ -33,7 +33,12 @@
     @try {
         CDVPluginResult* pluginResult;
         NSString* appId = [command.arguments objectAtIndex:0];
+#if defined(__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
+        NSString* iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/app/id%@", appId];
+#else
         NSString* iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@&action=write-review", appId];
+#endif
+            
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:iTunesLink]];
         
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -70,3 +75,4 @@
 }
 
 @end
+
