@@ -1,5 +1,5 @@
 {
-    "version": "2.0.2",
+    "version": "3.0.0",
     "name": "cordova-launch-review",
     "cordova_name": "Launch Review",
     "description": "Cordova/Phonegap plugin to launch the native store app on Android (Google Play) and iOS (App Store) on the review page for a given app.",
