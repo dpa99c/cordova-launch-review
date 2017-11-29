@@ -35,6 +35,7 @@
  */
 @interface LaunchReview :CDVPlugin {
 }
+@property (nonatomic, retain) NSString* ratingRequestCallbackId;
 - (void) launch:(CDVInvokedUrlCommand*)command;
 - (void) rating:(CDVInvokedUrlCommand*)command;
 

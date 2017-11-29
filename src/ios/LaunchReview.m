@@ -28,6 +28,16 @@
 
 
 @implementation LaunchReview
+
+- (void)pluginInitialize {
+    [super pluginInitialize];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(windowDidBecomeVisibleNotification:)
+                                                 name:UIWindowDidBecomeVisibleNotification
+                                               object:nil];
+}
+
 - (void) launch:(CDVInvokedUrlCommand*)command;
 {
     @try {
@@ -38,7 +48,7 @@
 #else
         NSString* iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@&action=write-review", appId];
 #endif
-            
+    
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:iTunesLink]];
         
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -55,8 +65,14 @@
         CDVPluginResult* pluginResult;
         
 #if defined(__IPHONE_10_3) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_3
+        
+        self.ratingRequestCallbackId = command.callbackId;
+        
         [SKStoreReviewController requestReview];
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        
+        
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"requested"];
+        [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
 #else
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Rating dialog requires iOS 10.3+"];
 #endif
@@ -73,6 +89,15 @@
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
+
+- (void)windowDidBecomeVisibleNotification:(NSNotification *)notification
+{
+    if ([notification.object isKindOfClass:NSClassFromString(@"SKStoreReviewPresentationWindow")]) {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"shown"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.ratingRequestCallbackId];
+    }
+}
+
 
 @end
 
