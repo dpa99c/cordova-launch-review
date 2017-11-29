@@ -123,16 +123,16 @@ Will be passed a single argument which is the error message string.
     
 Notes: 
 
-    - The Rating dialog will not be displayed every time `LaunchReview.rating()` is called - iOS limits the frequency with which it can be called ([see here](https://daringfireball.net/2017/01/new_app_store_review_features)).
-    - The Rating dialog may take several seconds to appear while iOS queries the Apple servers before displaying the dialog.
-    - The success function will therefore be called either once or twice:
-        - First: after `LaunchReview.rating()` is called and the request to show the dialog is successful
-        - Second: if and when the Rating dialog is actually displayed.
-    - Detection of the display of the Rating dialog is done using [inspection of the private class name](https://github.com/dpa99c/cordova-launch-review/blob/master/src/ios/LaunchReview.m#L95). 
-        - This is not officially sanctioned by Apple, so while it **should** pass App Store review, it may break if the class name is changed in a future iOS version.
-    - While it's possible to detect if the Rating dialog has been displayed, it's **not** possible to detect when it has been dismissed.
-        - Therefore, since there's no guarantee the dialog will be displayed and even then it may take several seconds before it displays, the only way to determine if it has **not** be shown is to set a timeout after successful requesting of the dialog which is cleared upon successful display of the dialog, or otherwise expires after a pre-determined period (i.e. a few seconds).
-         - See the [example project code](https://github.com/dpa99c/cordova-launch-review-example/blob/master/www/js/index.js#L32) for an illustration of this approach.
+- The Rating dialog will not be displayed every time `LaunchReview.rating()` is called - iOS limits the frequency with which it can be called ([see here](https://daringfireball.net/2017/01/new_app_store_review_features)).
+- The Rating dialog may take several seconds to appear while iOS queries the Apple servers before displaying the dialog.
+- The success function will therefore be called either once or twice:
+    - First: after `LaunchReview.rating()` is called and the request to show the dialog is successful
+    - Second: if and when the Rating dialog is actually displayed.
+- Detection of the display of the Rating dialog is done using [inspection of the private class name](https://github.com/dpa99c/cordova-launch-review/blob/master/src/ios/LaunchReview.m#L95). 
+    - This is not officially sanctioned by Apple, so while it **should** pass App Store review, it may break if the class name is changed in a future iOS version.
+- While it's possible to detect if the Rating dialog has been displayed, it's **not** possible to detect when it has been dismissed.
+    - Therefore, since there's no guarantee the dialog will be displayed and even then it may take several seconds before it displays, the only way to determine if it has **not** be shown is to set a timeout after successful requesting of the dialog which is cleared upon successful display of the dialog, or otherwise expires after a pre-determined period (i.e. a few seconds).
+     - See the [example project code](https://github.com/dpa99c/cordova-launch-review-example/blob/master/www/js/index.js#L32) for an illustration of this approach.
 
 ## isRatingSupported()
 
