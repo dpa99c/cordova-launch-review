@@ -24,8 +24,6 @@
         <clobbers target="LaunchReview" />
     </js-module>
     
-    <dependency id="cordova-plugin-device" version="*" />
-
     <!-- ios -->
         <platform name="ios">
             <config-file target="config.xml" parent="/*">

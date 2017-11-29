@@ -84,6 +84,17 @@
     }
 }
 
+- (void) isRatingSupported:(CDVInvokedUrlCommand*)command;
+{
+    NSString* isSupported;
+#if defined(__IPHONE_10_3) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_3
+    isSupported = @"1";
+#else
+    isSupported = @"0";
+#endif
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:isSupported] callbackId:command.callbackId];
+}
+
 - (void) handlePluginException: (NSException*) exception :(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];

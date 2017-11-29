@@ -38,5 +38,6 @@
 @property (nonatomic, retain) NSString* ratingRequestCallbackId;
 - (void) launch:(CDVInvokedUrlCommand*)command;
 - (void) rating:(CDVInvokedUrlCommand*)command;
+- (void) isRatingSupported:(CDVInvokedUrlCommand*)command;
 
 @end

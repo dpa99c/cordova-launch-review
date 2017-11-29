@@ -24,6 +24,12 @@
  */
 var LaunchReview = {};
 
+var isRatingSupported;
+
+cordova.exec(function(_isRatingSupported){
+    isRatingSupported = !!_isRatingSupported;
+}, null, 'LaunchReview', 'isRatingSupported', []);
+
 /**
  * Launches App Store on current platform in order to leave a review for given app
  * @param {string} appId (required) - ID of app to open in App Store
@@ -56,7 +62,7 @@ LaunchReview.rating = function(success, error) {
  * @returns {boolean} true if the current platform supports in-app ratings dialog
  */
 LaunchReview.isRatingSupported = function(){
-    return device.platform === "iOS" && parseFloat(device.version) >= 10.3;
+    return isRatingSupported;
 };
 
 module.exports = LaunchReview;
