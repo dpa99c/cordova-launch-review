@@ -122,6 +122,7 @@ Will be passed a single argument which is the error message string.
     });
     
 Notes: 
+
     - The Rating dialog will not be displayed every time `LaunchReview.rating()` is called - iOS limits the frequency with which it can be called ([see here](https://daringfireball.net/2017/01/new_app_store_review_features)).
     - The Rating dialog may take several seconds to appear while iOS queries the Apple servers before displaying the dialog.
     - The success function will therefore be called either once or twice:
