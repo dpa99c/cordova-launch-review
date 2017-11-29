@@ -26,6 +26,7 @@
 #import "LaunchReview.h"
 #import "StoreKit/StoreKit.h"
 
+#define REQUEST_TIMEOUT 60.0
 
 @implementation LaunchReview
 
@@ -36,51 +37,48 @@
                                              selector:@selector(windowDidBecomeVisibleNotification:)
                                                  name:UIWindowDidBecomeVisibleNotification
                                                object:nil];
+    self.appStoreId = nil;
+    self.launchRequestCallbackId = nil;
+    self.ratingRequestCallbackId = nil;
+    
+    // Try to pre-fetch the App ID at app startup
+    [self.commandDelegate runInBackground:^{
+        [self fetchAppIdFromBundleId];
+    }];
 }
 
 - (void) launch:(CDVInvokedUrlCommand*)command;
 {
     @try {
-        CDVPluginResult* pluginResult;
-        NSString* appId = [command.arguments objectAtIndex:0];
-#if defined(__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
-        NSString* iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/xy/app/foo/id%@?action=write-review", appId];
-#else
-        NSString* iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@&action=write-review", appId];
-#endif
-    
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:iTunesLink]];
+        self.launchRequestCallbackId = command.callbackId;
         
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        NSString* appId = [command.arguments objectAtIndex:0];
+        if([self isNull:appId]){
+            [self retrieveAppIdAndLaunch];
+        }else{
+            [self launchAppStore:appId];
+        }
     }
     @catch (NSException *exception) {
-        [self handlePluginException:exception :command];
+        [self handlePluginException:exception :command.callbackId];
     }
 }
 
 - (void) rating:(CDVInvokedUrlCommand*)command;
 {
     @try {
-        CDVPluginResult* pluginResult;
-        
 #if defined(__IPHONE_10_3) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_3
-        
         self.ratingRequestCallbackId = command.callbackId;
-        
         [SKStoreReviewController requestReview];
-        
-        
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"requested"];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"requested"];
         [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
-#else
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Rating dialog requires iOS 10.3+"];
-#endif
-        
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+#else
+        [self handlePluginError:@"Rating dialog requires iOS 10.3+" :command.callbackId];
+#endif
     }
     @catch (NSException *exception) {
-        [self handlePluginException:exception :command];
+        [self handlePluginException:exception :command.callbackId];
     }
 }
 
@@ -95,20 +93,190 @@
     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:isSupported] callbackId:command.callbackId];
 }
 
-- (void) handlePluginException: (NSException*) exception :(CDVInvokedUrlCommand*)command
+- (void) handlePluginException: (NSException*) exception :(NSString*)callbackId
 {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:exception.reason];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    [self handlePluginError:exception.reason :callbackId];
+}
+
+- (void) handlePluginError: (NSString*) errorMsg :(NSString*)callbackId
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorMsg];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
 }
 
 - (void)windowDidBecomeVisibleNotification:(NSNotification *)notification
 {
-    if ([notification.object isKindOfClass:NSClassFromString(@"SKStoreReviewPresentationWindow")]) {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"shown"];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.ratingRequestCallbackId];
+    @try {
+        if ([notification.object isKindOfClass:NSClassFromString(@"SKStoreReviewPresentationWindow")]) {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"shown"];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.ratingRequestCallbackId];
+        }
+    }
+    @catch (NSException *exception) {
+        [self handlePluginException:exception :self.ratingRequestCallbackId];
     }
 }
 
+- (BOOL) isNull:(NSString*) string
+{
+    return string == nil || string == (NSString*)[NSNull null];
+}
+
+- (void) launchAppStore:(NSString*) appId
+{
+#if defined(__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
+    NSString* iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/xy/app/foo/id%@?action=write-review", appId];
+#else
+    NSString* iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@&action=write-review", appId];
+#endif
+    
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:iTunesLink]];
+    
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:self.launchRequestCallbackId];
+}
+
+- (void) retrieveAppIdAndLaunch
+{
+    [self fetchAppIdFromBundleId];
+    if(self.appStoreId != nil){
+        [self launchAppStore:self.appStoreId];
+    }
+}
+
+- (void) fetchAppIdFromBundleId
+{
+    if(self.appStoreId != nil) return;
+    
+    NSString* bundleId = [NSBundle mainBundle].bundleIdentifier;
+    NSString* iTunesServiceURL = [NSString stringWithFormat:@"http://itunes.apple.com/lookup?bundleId=%@", bundleId];
+    
+    NSString* errorMsg = nil;
+    NSError *error = nil;
+    NSURLResponse *response = nil;
+    NSURL *url = [NSURL URLWithString:iTunesServiceURL];
+    NSURLRequest *request = [NSURLRequest requestWithURL:url
+                                             cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
+                                         timeoutInterval:REQUEST_TIMEOUT];
+    
+    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+
+    NSInteger statusCode = ((NSHTTPURLResponse *)response).statusCode;
+    if (data && statusCode == 200){
+        //in case error is garbage...
+        error = nil;
+        
+        id json = nil;
+        if ([NSJSONSerialization class]){
+            json = [[NSJSONSerialization JSONObjectWithData:data options:(NSJSONReadingOptions)0 error:&error][@"results"] lastObject];
+        }
+        else{
+            //convert to string
+            json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        }
+        
+        if (!error){
+            //check bundle ID matches
+            NSString* responseBundleId = [self valueForKey:@"bundleId" inJSON:json];
+            if (responseBundleId){
+                self.appStoreId = [self valueForKey:@"trackId" inJSON:json];
+            }else{
+                errorMsg = @"The application could not be found on the App Store.";
+            }
+        }else{
+            errorMsg = [error localizedDescription];
+        }
+    }else if (statusCode >= 400){
+        //http error
+        errorMsg = [NSString stringWithFormat:@"The server returned a %@ error", @(statusCode)];
+    }else{
+        errorMsg = @"An unknown server error occurred";
+    }
+    
+    if(errorMsg != nil && self.launchRequestCallbackId != nil){
+        [self handlePluginError:errorMsg :self.launchRequestCallbackId];
+    }
+}
+
+- (NSString *)valueForKey:(NSString *)key inJSON:(id)json
+{
+    if ([json isKindOfClass:[NSString class]])
+    {
+        //use legacy parser
+        NSRange keyRange = [json rangeOfString:[NSString stringWithFormat:@"\"%@\"", key]];
+        if (keyRange.location != NSNotFound)
+        {
+            NSInteger start = keyRange.location + keyRange.length;
+            NSRange valueStart = [json rangeOfString:@":" options:(NSStringCompareOptions)0 range:NSMakeRange(start, [(NSString *)json length] - start)];
+            if (valueStart.location != NSNotFound)
+            {
+                start = valueStart.location + 1;
+                NSRange valueEnd = [json rangeOfString:@"," options:(NSStringCompareOptions)0 range:NSMakeRange(start, [(NSString *)json length] - start)];
+                if (valueEnd.location != NSNotFound)
+                {
+                    NSString *value = [json substringWithRange:NSMakeRange(start, valueEnd.location - start)];
+                    value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                    while ([value hasPrefix:@"\""] && ![value hasSuffix:@"\""])
+                    {
+                        if (valueEnd.location == NSNotFound)
+                        {
+                            break;
+                        }
+                        NSInteger newStart = valueEnd.location + 1;
+                        valueEnd = [json rangeOfString:@"," options:(NSStringCompareOptions)0 range:NSMakeRange(newStart, [(NSString *)json length] - newStart)];
+                        value = [json substringWithRange:NSMakeRange(start, valueEnd.location - start)];
+                        value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                    }
+                    
+                    value = [value stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\""]];
+                    value = [value stringByReplacingOccurrencesOfString:@"\\\\" withString:@"\\"];
+                    value = [value stringByReplacingOccurrencesOfString:@"\\/" withString:@"/"];
+                    value = [value stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""];
+                    value = [value stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"];
+                    value = [value stringByReplacingOccurrencesOfString:@"\\r" withString:@"\r"];
+                    value = [value stringByReplacingOccurrencesOfString:@"\\t" withString:@"\t"];
+                    value = [value stringByReplacingOccurrencesOfString:@"\\f" withString:@"\f"];
+                    value = [value stringByReplacingOccurrencesOfString:@"\\b" withString:@"\f"];
+                    
+                    while (YES)
+                    {
+                        NSRange unicode = [value rangeOfString:@"\\u"];
+                        if (unicode.location == NSNotFound || unicode.location + unicode.length == 0)
+                        {
+                            break;
+                        }
+                        
+                        uint32_t c = 0;
+                        NSString *hex = [value substringWithRange:NSMakeRange(unicode.location + 2, 4)];
+                        NSScanner *scanner = [NSScanner scannerWithString:hex];
+                        [scanner scanHexInt:&c];
+                        
+                        if (c <= 0xffff)
+                        {
+                            value = [value stringByReplacingCharactersInRange:NSMakeRange(unicode.location, 6) withString:[NSString stringWithFormat:@"%C", (unichar)c]];
+                        }
+                        else
+                        {
+                            //convert character to surrogate pair
+                            uint16_t x = (uint16_t)c;
+                            uint16_t u = (c >> 16) & ((1 << 5) - 1);
+                            uint16_t w = (uint16_t)u - 1;
+                            unichar high = 0xd800 | (w << 6) | x >> 10;
+                            unichar low = (uint16_t)(0xdc00 | (x & ((1 << 10) - 1)));
+                            
+                            value = [value stringByReplacingCharactersInRange:NSMakeRange(unicode.location, 6) withString:[NSString stringWithFormat:@"%C%C", high, low]];
+                        }
+                    }
+                    return value;
+                }
+            }
+        }
+    }
+    else
+    {
+        return json[key];
+    }
+    return nil;
+}
 
 @end
 

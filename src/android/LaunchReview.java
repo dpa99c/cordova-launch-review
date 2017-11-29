@@ -20,7 +20,12 @@ public class LaunchReview extends CordovaPlugin {
 		boolean result = false;
 		if ("launch".equals(action)){
 			try {
-				String appPackageName = args.getString(0);
+				String appPackageName;
+				if(!args.isNull(0)){
+					appPackageName = args.getString(0);
+				}else{
+					appPackageName = cordova.getActivity().getPackageName();
+				}
 				Log.d(LOG_TAG, "Opening market for ".concat(appPackageName));
 				Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id="+appPackageName));
 				marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_DOCUMENT | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);

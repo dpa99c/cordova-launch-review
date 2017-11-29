@@ -6,7 +6,7 @@
     version="3.0.0">
 
     <name>Launch Review</name>
-    <description>This Cordova/Phonegap plugin for iOS and Android launches the native store app in order for the user to leave a review.</description>
+    <description>Cordova/Phonegap plugin for iOS and Android to assist in leaving user reviews/ratings in the App Stores.</description>
     <author>Dave Alden</author>
 
     <engines>

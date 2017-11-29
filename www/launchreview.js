@@ -32,12 +32,25 @@ cordova.exec(function(_isRatingSupported){
 
 /**
  * Launches App Store on current platform in order to leave a review for given app
- * @param {string} appId (required) - ID of app to open in App Store
  * @param {function} success (optional) -  function to be called when plugin call was successful.
  * @param {function} error (optional) - function to be called on error during plugin call.
  * Will be passed a single argument which is the error message string.
+ * @param {string} appId (optional) - ID of app to open in App Store.
+ * If not specified, the ID for the current app will be used.
  */
-LaunchReview.launch = function(appId, success, error) {
+LaunchReview.launch = function(success, error, appId) {
+    // backward compatibility shim for v1 & v2 where function signature was (appId, success, error)
+    if(typeof success === "string"){
+        console.warn("The launch function signature has been updated from (appId, success, error) to (success, error, appId) in v3 of the plugin. This deprecation shim will be removed in v4.");
+
+        var _appId = arguments[0];
+        var _success = arguments[1];
+        var _error = arguments[2];
+
+        success = _success;
+        error = _error;
+        appId = _appId;
+    }
     cordova.exec(success, error, 'LaunchReview', 'launch', [appId]);
 };
 

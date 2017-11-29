@@ -21,11 +21,10 @@ Cordova Launch Review plugin [![Latest Stable Version](https://img.shields.io/np
 
 # Overview
 
-This Cordova/Phonegap plugin for iOS and Android launches the native store app in order for the user to leave a review.
+Cordova/Phonegap plugin for iOS and Android to assist in leaving user reviews/ratings in the App Stores.
 
-- On Android, the plugin opens the the app's storepage in the Play Store where the user can leave a review by pressing the stars to give a rating.
-- On iOS, the plugin opens the app's storepage in the App Store and automatically opens the dialog for the user to leave a rating or review.
-- On iOS 10.3 and above, the plugin supports the [native in-app rating dialog](https://developer.apple.com/documentation/storekit/skstorereviewcontroller/2851536-requestreview) which allows a user to rate your app without needing to open the App Store.
+- Launches the platform's App Store page for the current app in order for the user to leave a review.
+- On iOS 10.3 and above, invokes the [native in-app rating dialog](https://developer.apple.com/documentation/storekit/skstorereviewcontroller/2851536-requestreview) which allows a user to rate your app without needing to open the App Store.
 
 The plugin is registered on [npm](https://www.npmjs.com/package/cordova-launch-review) (requires Cordova CLI 5.0.0+) as `cordova-launch-review`
 
@@ -55,23 +54,30 @@ The plugin is exposed via the `LaunchReview` global namespace.
 
 ## launch()
 
-Both Android and iOS.
+Platforms: Android and iOS
 
-Launches the store app using the given app ID.
+Launches the App Store page for the current app in order for the user to leave a review.
 
+- On Android, opens the app's in the Play Store where the user can leave a review by pressing the stars to give a rating.
+- On iOS, opens the app's page in the App Store and automatically opens the dialog for the user to leave a rating or review.
 
-    LaunchReview.launch(appId, success, error);
+    LaunchReview.launch(success, error, appId);
 
 ### Parameters
 
-- {string} appID - the platform-specific app ID to use to open the page in the store app
+- {function} success - (optional) function to execute on successfully launching store app.
+- {function} error - (optional) function to execute on failure to launch store app. Will be passed a single argument which is the error message string.
+- {string} appID - (optional) the platform-specific app ID to use to open the page in the store app
+    - If not specified, the plugin will use the app ID for the app in which the plugin is contained.
     - On Android this is the full package name of the app. For example, for Google Maps: `com.google.android.apps.maps`
     - On iOS this is the Apple ID of the app. For example, for Google Maps: `585027354`
-- {function} success - Function to execute on successfully launching store app.
-- {function} error - Function to execute on failure to launch store app. Will be passed a single argument which is the error message string.
 
 
-### Example usage
+### Simple usage
+
+    LaunchReview.launch();
+    
+### Advanced usage
 
     var appId, platform = device.platform.toLowerCase();
 
@@ -84,43 +90,22 @@ Launches the store app using the given app ID.
             break;
     }
 
-    LaunchReview.launch(appId, function(){
+    LaunchReview.launch(function(){
         console.log("Successfully launched store app");
     },function(err){
         console.log("Error launching store app: " + err);
-    });
+    }, appId);
 
 ## rating()
 
-iOS only.
+Platforms: iOS only
 
-Opens the in-app ratings dialogs introduced by iOS 10.3.
+On iOS 10.3 and above, invokes the [native in-app rating dialog](https://developer.apple.com/documentation/storekit/skstorereviewcontroller/2851536-requestreview) which allows a user to rate your app without needing to open the App Store.
+
 Calling this on any platform other than iOS 10.3 or above will result in the error function being called.
 
     LaunchReview.rating(success, error);
-
-### Parameters
-
-- {function} success - Function to execute on requesting and successful of launching rating dialog.
-Will be passed a single string argument which indicates the result.
-Will be called the first time after `LaunchReview.rating()` is called and the request to show the dialog is successful.
-*May* be called a second time if the rating dialog is successfully displayed.
-- {function} error - Function to execute on failure to launch rating dialog. 
-Will be passed a single argument which is the error message string.
-
-
-### Example usage
-
-    LaunchReview.rating(function(result){
-        if(result === "requested"){
-            console.log("Requested display of rating dialog");
-        }else if(result === "shown"){
-            console.log("Successfully displayed rating dialog");
-        }
-    },function(err){
-        console.log("Error opening rating dialog: " + err);
-    });
-    
+      
 Notes: 
 
 - The Rating dialog will not be displayed every time `LaunchReview.rating()` is called - iOS limits the frequency with which it can be called ([see here](https://daringfireball.net/2017/01/new_app_store_review_features)).
@@ -134,19 +119,48 @@ Notes:
     - Therefore, since there's no guarantee the dialog will be displayed and even then it may take several seconds before it displays, the only way to determine if it has **not** be shown is to set a timeout after successful requesting of the dialog which is cleared upon successful display of the dialog, or otherwise expires after a pre-determined period (i.e. a few seconds).
      - See the [example project code](https://github.com/dpa99c/cordova-launch-review-example/blob/master/www/js/index.js#L32) for an illustration of this approach.
 
+### Parameters
+
+- {function} success - (optional) function to execute on requesting and successful of launching rating dialog.
+Will be passed a single string argument which indicates the result.
+Will be called the first time after `LaunchReview.rating()` is called and the request to show the dialog is successful.
+*May* be called a second time if the rating dialog is successfully displayed.
+- {function} error - optional) function to execute on failure to launch rating dialog. 
+Will be passed a single argument which is the error message string.
+
+
+### Simple usage
+
+    LaunchReview.rating();
+    
+### Advanced usage
+
+    LaunchReview.rating(function(result){
+        if(result === "requested"){
+            console.log("Requested display of rating dialog");
+        }else if(result === "shown"){
+            console.log("Successfully displayed rating dialog");
+        }
+    },function(err){
+        console.log("Error opening rating dialog: " + err);
+    });
+   
+
 ## isRatingSupported()
 
-Indicates if the current platform supports in-app ratings dialog, i.e. calling `LaunchReview.rating()`.
-Will return true if current platform is iOS 10.3 or above.
+Platforms: Android and iOS
 
-    LaunchReview.isRatingSupported();
+Indicates if the current platform/version supports in-app ratings dialog, i.e. calling `LaunchReview.rating()`.
+Will return `true` if current platform is iOS 10.3 or above.
+
+    var isSupported = LaunchReview.isRatingSupported();
 
 ### Example usage
 
     if(LaunchReview.isRatingSupported()){
         LaunchReview.rating();
     }else{
-        LaunchReview.launch(myAppId);
+        LaunchReview.launch();
     }
 
 # Example project
