@@ -25,6 +25,7 @@
  */
 #import "LaunchReview.h"
 #import "StoreKit/StoreKit.h"
+#import "UIWindow+DismissNotification.h"
 
 #define REQUEST_TIMEOUT 60.0
 
@@ -37,6 +38,10 @@
                                              selector:@selector(windowDidBecomeVisibleNotification:)
                                                  name:UIWindowDidBecomeVisibleNotification
                                                object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(windowDidBecomeHiddenNotification:)
+                                                 name:UIWindowDidBecomeHiddenNotification
+                                            object:nil];
     self.appStoreId = nil;
     self.launchRequestCallbackId = nil;
     self.ratingRequestCallbackId = nil;
@@ -104,11 +109,27 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
 }
 
+
 - (void)windowDidBecomeVisibleNotification:(NSNotification *)notification
 {
     @try {
-        if ([notification.object isKindOfClass:NSClassFromString(@"SKStoreReviewPresentationWindow")]) {
+        if([notification.object class] == [MonitorObject class]){
             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"shown"];
+            [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.ratingRequestCallbackId];
+        }
+    }
+    @catch (NSException *exception) {
+        [self handlePluginException:exception :self.ratingRequestCallbackId];
+    }
+}
+
+- (void)windowDidBecomeHiddenNotification:(NSNotification *)notification
+{
+    @try {
+        if([notification.object class] == [MonitorObject class]){
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"dismissed"];
+            [pluginResult setKeepCallback:[NSNumber numberWithBool:NO]];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:self.ratingRequestCallbackId];
         }
     }

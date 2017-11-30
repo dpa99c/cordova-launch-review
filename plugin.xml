@@ -3,7 +3,7 @@
     xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-launch-review"
-    version="3.0.0">
+    version="3.1.0">
 
     <name>Launch Review</name>
     <description>Cordova/Phonegap plugin for iOS and Android to assist in leaving user reviews/ratings in the App Stores.</description>
@@ -34,6 +34,8 @@
 
             <header-file src="src/ios/LaunchReview.h" />
             <source-file src="src/ios/LaunchReview.m" />
+            <header-file src="src/ios/UIWindow+DismissNotification.h" />
+            <source-file src="src/ios/UIWindow+DismissNotification.m" />
             
             <framework src="StoreKit.framework" />
     </platform>
