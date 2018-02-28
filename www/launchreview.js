@@ -27,7 +27,7 @@ var LaunchReview = {};
 var isRatingSupported;
 
 cordova.exec(function(_isRatingSupported){
-    isRatingSupported = !!_isRatingSupported;
+    isRatingSupported = !!parseInt(_isRatingSupported);
 }, null, 'LaunchReview', 'isRatingSupported', []);
 
 /**

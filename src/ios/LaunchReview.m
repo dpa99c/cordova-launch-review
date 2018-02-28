@@ -72,15 +72,15 @@
 - (void) rating:(CDVInvokedUrlCommand*)command;
 {
     @try {
-#if defined(__IPHONE_10_3) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_3
-        self.ratingRequestCallbackId = command.callbackId;
-        [SKStoreReviewController requestReview];
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"requested"];
-        [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-#else
-        [self handlePluginError:@"Rating dialog requires iOS 10.3+" :command.callbackId];
-#endif
+        if ([SKStoreReviewController class]) {
+            self.ratingRequestCallbackId = command.callbackId;
+            [SKStoreReviewController requestReview];
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"requested"];
+            [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }else{
+            [self handlePluginError:@"Rating dialog requires iOS 10.3+" :command.callbackId];
+        }
     }
     @catch (NSException *exception) {
         [self handlePluginException:exception :command.callbackId];
@@ -90,11 +90,11 @@
 - (void) isRatingSupported:(CDVInvokedUrlCommand*)command;
 {
     NSString* isSupported;
-#if defined(__IPHONE_10_3) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_3
-    isSupported = @"1";
-#else
-    isSupported = @"0";
-#endif
+    if ([SKStoreReviewController class]) {
+        isSupported = @"1";
+    }else{
+        isSupported = @"0";
+    }
     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:isSupported] callbackId:command.callbackId];
 }
 
@@ -145,11 +145,12 @@
 
 - (void) launchAppStore:(NSString*) appId
 {
-#if defined(__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
-    NSString* iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/xy/app/foo/id%@?action=write-review", appId];
-#else
-    NSString* iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@&action=write-review", appId];
-#endif
+    NSString* iTunesLink;
+    if([[[UIDevice currentDevice] systemVersion] floatValue] >= 11){
+        iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/xy/app/foo/id%@?action=write-review", appId];
+    }else{
+        iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@&action=write-review", appId];
+    }
     
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:iTunesLink]];
     
@@ -300,4 +301,3 @@
 }
 
 @end
-
