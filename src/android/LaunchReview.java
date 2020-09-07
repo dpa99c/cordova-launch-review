@@ -8,6 +8,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.android.play.core.review.ReviewInfo;
+import com.google.android.play.core.review.ReviewManager;
+import com.google.android.play.core.review.ReviewManagerFactory;
+import com.google.android.play.core.tasks.Task;
+
 import org.apache.cordova.*;
 
 public class LaunchReview extends CordovaPlugin {
@@ -33,14 +38,51 @@ public class LaunchReview extends CordovaPlugin {
 				result = true;
 				callbackContext.success();
 			}catch( JSONException e ) {
-				Log.e(LOG_TAG, "Exception occurred: ".concat(e.getMessage()));
+				handleException(e, callbackContext);
 			}
-		} else if ("isRatingSupported".equals(action)){
+		} else if ("rating".equals(action)){
+			ReviewManager manager = ReviewManagerFactory.create(cordova.getContext());
+			Task<ReviewInfo> request = manager.requestReviewFlow();
+			request.addOnCompleteListener(requestTask -> {
+				try{
+					if (taskWasSuccessful(requestTask)) {
+						ReviewInfo reviewInfo = requestTask.getResult();
+						Task<Void> flow = manager.launchReviewFlow(cordova.getActivity(), reviewInfo);
+						flow.addOnCompleteListener(launchTask -> {
+							try{
+								if (taskWasSuccessful(launchTask)) {
+									callbackContext.success();
+								}else{
+									handleTaskFailed(launchTask, callbackContext);
+								}
+							}catch (Exception e){
+								handleException(e, callbackContext);
+							}
+						});
+					} else {
+						handleTaskFailed(requestTask, callbackContext);
+					}
+				}catch (Exception e){
+					handleException(e, callbackContext);
+				}
+			});
             result = true;
             callbackContext.success(0);
 		} else {
-			Log.e(LOG_TAG, "Invalid action");
+			callbackContext.error("Invalid action");
 		}
 		return result;
+	}
+
+	private void handleException(Exception e, CallbackContext callbackContext){
+		callbackContext.error( "Exception occurred: ".concat(e.getMessage()));
+	}
+
+	private boolean taskWasSuccessful(Task task){
+		return task.isSuccessful() || task.getException() == null;
+	}
+
+	private void handleTaskFailed(Task task, CallbackContext callbackContext){
+		callbackContext.error( "Task failed: ".concat(task.getException().getMessage()));
 	}
 }

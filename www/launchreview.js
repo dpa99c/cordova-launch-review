@@ -24,12 +24,6 @@
  */
 var LaunchReview = {};
 
-var isRatingSupported;
-
-cordova.exec(function(_isRatingSupported){
-    isRatingSupported = !!parseInt(_isRatingSupported);
-}, null, 'LaunchReview', 'isRatingSupported', []);
-
 /**
  * Launches App Store on current platform in order to leave a review for given app
  * @param {function} success (optional) -  function to be called when plugin call was successful.
@@ -39,24 +33,11 @@ cordova.exec(function(_isRatingSupported){
  * If not specified, the ID for the current app will be used.
  */
 LaunchReview.launch = function(success, error, appId) {
-    // backward compatibility shim for v1 & v2 where function signature was (appId, success, error)
-    if(typeof success === "string"){
-        console.warn("The launch function signature has been updated from (appId, success, error) to (success, error, appId) in v3 of the plugin. This deprecation shim will be removed in v4.");
-
-        var _appId = arguments[0];
-        var _success = arguments[1];
-        var _error = arguments[2];
-
-        success = _success;
-        error = _error;
-        appId = _appId;
-    }
     cordova.exec(success, error, 'LaunchReview', 'launch', [appId]);
 };
 
 /**
- * Opens the in-app ratings dialogs introduced by iOS 10.3.
- * iOS only. Calling this on any platform other than iOS 10.3 or above will result in the error function being called.
+ * Opens the in-app ratings dialog on iOS 10.3+ or the in-app review dialog on Android.
  * @param {function} success (optional) -  function to be called when plugin call was successful.
  * @param {function} error (optional) - function to be called on error during plugin call.
  * Will be passed a single argument which is the error message string.
@@ -71,11 +52,11 @@ LaunchReview.rating = function(success, error) {
 
 /**
  * Indicates if the current platform supports in-app ratings dialog, i.e. calling LaunchReview.rating().
- * Will return true if current platform is iOS 10.3 or above.
+ * Will return true if current platform is Android or iOS 10.3 or above.
  * @returns {boolean} true if the current platform supports in-app ratings dialog
  */
 LaunchReview.isRatingSupported = function(){
-    return isRatingSupported;
+    return cordova.platformId === 'android' || (cordova.platformId === 'ios' && parseFloat(device.version) >= 10.3)
 };
 
 module.exports = LaunchReview;

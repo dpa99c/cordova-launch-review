@@ -87,17 +87,6 @@
     }
 }
 
-- (void) isRatingSupported:(CDVInvokedUrlCommand*)command;
-{
-    NSString* isSupported;
-    if ([SKStoreReviewController class]) {
-        isSupported = @"1";
-    }else{
-        isSupported = @"0";
-    }
-    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:isSupported] callbackId:command.callbackId];
-}
-
 - (void) handlePluginException: (NSException*) exception :(NSString*)callbackId
 {
     [self handlePluginError:exception.reason :callbackId];

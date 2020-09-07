@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin
-    xmlns="http://apache.org/cordova/ns/plugins/1.0"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    id="cordova-launch-review"
-    version="3.1.1">
+        xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="cordova-launch-review"
+        version="4.0.0">
 
     <name>Launch Review</name>
     <description>Cordova/Phonegap plugin for iOS and Android to assist in leaving user reviews/ratings in the App Stores.</description>
     <author>Dave Alden</author>
-
-    <engines>
-        <engine name="cordova" version=">=3.0.0" />
-    </engines>
 
     <repo>https://github.com/dpa99c/cordova-launch-review.git</repo>
     <issue>https://github.com/dpa99c/cordova-launch-review/issues</issue>
@@ -21,34 +17,39 @@
     <license>MIT</license>
 
     <js-module src="www/launchreview.js" name="LaunchReview">
-        <clobbers target="LaunchReview" />
+        <clobbers target="LaunchReview"/>
     </js-module>
-    
-    <!-- ios -->
-        <platform name="ios">
-            <config-file target="config.xml" parent="/*">
-                <feature name="LaunchReview">
-                    <param name="ios-package" value="LaunchReview"/>
-                </feature>
-            </config-file>
 
-            <header-file src="src/ios/LaunchReview.h" />
-            <source-file src="src/ios/LaunchReview.m" />
-            <header-file src="src/ios/UIWindow+DismissNotification.h" />
-            <source-file src="src/ios/UIWindow+DismissNotification.m" />
-            
-            <framework src="StoreKit.framework" />
+    <dependency id="cordova-plugin-device" version="^2.0.3" />
+
+    <!-- ios -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="LaunchReview">
+                <param name="ios-package" value="LaunchReview"/>
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/LaunchReview.h"/>
+        <source-file src="src/ios/LaunchReview.m"/>
+        <header-file src="src/ios/UIWindow+DismissNotification.h"/>
+        <source-file src="src/ios/UIWindow+DismissNotification.m"/>
+
+        <framework src="StoreKit.framework"/>
     </platform>
 
     <!-- android -->
     <platform name="android">
+        <preference name="ANDROID_PLAY_SERVICES_CORE_VERSION" default="1.8.0" />
+        <framework src="com.google.android.play:core:$ANDROID_PLAY_SERVICES_CORE_VERSION" />
+
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="LaunchReview">
                 <param name="android-package" value="uk.co.workingedge.phonegap.plugin.LaunchReview"/>
             </feature>
         </config-file>
 
-        <source-file src="src/android/LaunchReview.java" target-dir="src/uk/co/workingedge/phonegap/plugin" />
+        <source-file src="src/android/LaunchReview.java" target-dir="src/uk/co/workingedge/phonegap/plugin"/>
     </platform>
 
 </plugin>
