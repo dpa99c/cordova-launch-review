@@ -132,6 +132,7 @@ Platforms: Android and iOS
         - *May* be called a third time if/when the rating dialog is dismissed with value `dismissed`.
     - Android
         - Will be passed a single string argument which indicates the result: `requested`
+        - *May* be called once after the dialog was successfully displayed **and** the user dismisses the dialog.
 - {function} error - (optional) function to execute on failure to launch rating dialog. 
     - Will be passed a single argument which is the error message string.
 
@@ -142,31 +143,52 @@ Platforms: Android and iOS
     
 ### Advanced usage
 
-    var MAX_DIALOG_WAIT_TIME = 5000; //max time to wait for rating dialog to display
+    //max time to wait for rating dialog to display on iOS
+    var MAX_DIALOG_WAIT_TIME_IOS = 5*1000; 
+    
+    //max time to wait for rating dialog to display on Android and be submitted by user
+    var MAX_DIALOG_WAIT_TIME_ANDROID = 60*1000; 
+    
     var ratingTimerId;
-
-    LaunchReview.rating(function(result){
+    
+    function ratingDialogNotShown(){
+        var msg;
         if(cordova.platformId === "android"){
-            console.log("Rating dialog displayed");
+            msg = "Rating dialog outcome not received (after " + MAX_DIALOG_WAIT_TIME_ANDROID + "ms)";
         }else if(cordova.platformId === "ios"){
-            if(result === "requested"){
-                console.log("Requested display of rating dialog");
-                
-                ratingTimerId = setTimeout(function(){
-                    console.warn("Rating dialog was not shown (after " + MAX_DIALOG_WAIT_TIME + "ms)");
-                }, MAX_DIALOG_WAIT_TIME);
-            }else if(result === "shown"){
-                console.log("Rating dialog displayed");
-                
-                clearTimeout(ratingTimerId);
-            }else if(result === "dismissed"){
-                console.log("Rating dialog dismissed");
-            }
+            msg = "Rating dialog was not shown (after " + MAX_DIALOG_WAIT_TIME_IOS + "ms)";
         }
-        
-    },function(err){
-        console.log("Error opening rating dialog: " + err);
-    });
+        console.warn(msg);
+    }
+
+    function rating(){
+        if(cordova.platformId === "android"){
+            ratingTimerId = setTimeout(ratingDialogNotShown, MAX_DIALOG_WAIT_TIME_ANDROID);
+        }
+    
+        LaunchReview.rating(function(status){
+            if(status === "requested"){
+                if(cordova.platformId === "android"){
+                    console.log("Displayed rating dialog");
+                    clearTimeout(ratingTimerId);
+                }else if(cordova.platformId === "ios"){
+                    console.log("Requested rating dialog");
+                    ratingTimerId = setTimeout(ratingDialogNotShown, MAX_DIALOG_WAIT_TIME_IOS);
+                }
+            }else if(status === "shown"){
+                console.log("Rating dialog displayed");
+                clearTimeout(ratingTimerId);
+            }else if(status === "dismissed"){
+                console.log("Rating dialog dismissed");
+                clearTimeout(ratingTimerId);
+            }
+        }, function (err){
+            console.error("Error launching rating dialog: " + err);
+            clearTimeout(ratingTimerId);
+        });
+    }
+    
+    rating(); // app invokes eg. via UI action
    
 
 ## isRatingSupported()
