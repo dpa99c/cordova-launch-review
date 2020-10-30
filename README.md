@@ -117,19 +117,21 @@ Platforms: Android and iOS
 - Be sure to follow the [Android guidelines on when to request an in-app review](https://developer.android.com/guide/playcore/in-app-review#when-to-request)
 - Google Play [enforces a quota](https://developer.android.com/guide/playcore/in-app-review#quotas) on how often a user can be shown the review dialog which means the dialog might not display after you call this method. 
 - The user must first rate your app in the native dialog before being shown the review textarea input.
+- Neither `success` or `error` will not be called if dialog was not shown due to rate limiting, etc.
+    - If you need to know the outcome it's therefore best to set timeout after which you assume the dialog has failed to show - see the example project for an example of this.
+- If you're having problems with getting the native rating dialog to appear, make sure you've followed all the steps in the [Android guidelines on testing in-app reviews](https://developer.android.com/guide/playcore/in-app-review/test).
   
 
 ### Parameters
 
-- {function} success - (optional) function to execute on requesting and successful of launching rating dialog.
+- {function} success - (optional) function to execute on successfully requesting (note: this does not guarantee it will be displayed) the launch rating dialog
     - iOS 
         - Will be passed a single string argument which indicates the result: `requested`, `shown` or `dismissed`.
         - Will be called the first time after `LaunchReview.rating()` is called and the request to show the dialog is successful with value `requested`.
         - *May* be called a second time if/when the rating dialog is successfully displayed with value `shown`.
         - *May* be called a third time if/when the rating dialog is dismissed with value `dismissed`.
     - Android
-        - Will not be passed any callback arguments
-        - Will not be called if dialog was not shown due to rate limiting
+        - Will be passed a single string argument which indicates the result: `requested`
 - {function} error - (optional) function to execute on failure to launch rating dialog. 
     - Will be passed a single argument which is the error message string.
 

@@ -51,13 +51,15 @@ public class LaunchReview extends CordovaPlugin {
 						flow.addOnCompleteListener(launchTask -> {
 							try{
 								if (taskWasSuccessful(launchTask)) {
-									callbackContext.success();
+									callbackContext.success("requested");
 								}else{
 									handleTaskFailed(launchTask, callbackContext);
 								}
 							}catch (Exception e){
 								handleException(e, callbackContext);
 							}
+						}).addOnFailureListener(e -> {
+							handleException(e, callbackContext);
 						});
 					} else {
 						handleTaskFailed(requestTask, callbackContext);
@@ -65,9 +67,10 @@ public class LaunchReview extends CordovaPlugin {
 				}catch (Exception e){
 					handleException(e, callbackContext);
 				}
+			}).addOnFailureListener(e -> {
+				handleException(e, callbackContext);
 			});
             result = true;
-            callbackContext.success(0);
 		} else {
 			callbackContext.error("Invalid action");
 		}
