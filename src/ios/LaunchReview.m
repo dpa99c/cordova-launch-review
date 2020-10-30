@@ -102,7 +102,10 @@
 - (void)windowDidBecomeVisibleNotification:(NSNotification *)notification
 {
     @try {
-        if([notification.object class] == [MonitorObject class]){
+        NSString* notificationClassName = NSStringFromClass([notification.object class]);
+        if([notification.object class] == [MonitorObject class]
+           || [notificationClassName isEqualToString:@"SKStoreReviewPresentationWindow"]
+        ){
             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"shown"];
             [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:self.ratingRequestCallbackId];
@@ -116,7 +119,10 @@
 - (void)windowDidBecomeHiddenNotification:(NSNotification *)notification
 {
     @try {
-        if([notification.object class] == [MonitorObject class]){
+        NSString* notificationClassName = NSStringFromClass([notification.object class]);
+        if([notification.object class] == [MonitorObject class]
+           || [notificationClassName isEqualToString:@"SKStoreReviewPresentationWindow"]
+        ){
             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"dismissed"];
             [pluginResult setKeepCallback:[NSNumber numberWithBool:NO]];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:self.ratingRequestCallbackId];
