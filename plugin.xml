@@ -3,7 +3,7 @@
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-launch-review"
-        version="4.0.1">
+        version="4.1.0">
 
     <name>Launch Review</name>
     <description>Cordova/Phonegap plugin for iOS and Android to assist in leaving user reviews/ratings in the App Stores.</description>
@@ -40,8 +40,7 @@
 
     <!-- android -->
     <platform name="android">
-        <preference name="ANDROID_PLAY_SERVICES_CORE_VERSION" default="1.8.0" />
-        <framework src="com.google.android.play:core:$ANDROID_PLAY_SERVICES_CORE_VERSION" />
+        <framework src="com.google.android.play:review:2.0.1" />
 
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="LaunchReview">
