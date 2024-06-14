@@ -9,6 +9,9 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.google.android.gms.tasks.*;
+import com.google.android.play.core.review.ReviewInfo;
+import com.google.android.play.core.review.ReviewManager;
+import com.google.android.play.core.review.ReviewManagerFactory;
 import org.apache.cordova.*;
 
 public class LaunchReview extends CordovaPlugin {
