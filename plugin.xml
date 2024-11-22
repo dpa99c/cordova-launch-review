@@ -20,7 +20,7 @@
         <clobbers target="LaunchReview"/>
     </js-module>
 
-    <dependency id="cordova-plugin-device" version="^2.0.3" />
+    <dependency id="cordova-plugin-device" version="*" />
 
     <!-- ios -->
     <platform name="ios">
