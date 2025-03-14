@@ -147,7 +147,12 @@
         iTunesLink = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@&action=write-review", appId];
     }
     
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:iTunesLink]];
+    NSURL *url = [NSURL URLWithString:iTunesLink];
+    if ([[UIApplication sharedApplication] canOpenURL:url]) {
+        [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+    } else {
+        NSLog(@"Cannot open URL: %@", url);
+    }
     
     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:self.launchRequestCallbackId];
 }
